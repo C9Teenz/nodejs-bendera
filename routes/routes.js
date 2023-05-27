@@ -1,9 +1,18 @@
 const { Router } = require("express");
 const userC = require("../controller/user_controller");
 const authC = require("../controller/auth_controller");
-const  verifyToken = require("../middleware/veriftoken");
+const verifyToken = require("../middleware/veriftoken");
 let userRouter = Router();
 const multer = require("multer");
+
+const fileFilter = (req, file, cb) => {
+  // Mengecek tipe file yang diizinkan
+  if (file.mimetype.match(/^image/)) {
+    cb(null, true); // Mengizinkan file diunggah
+  } else {
+    cb(new Error("Invalid file type. Only images are allowed."), false); // Menolak file yang tidak sesuai
+  }
+};
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -14,7 +23,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 userRouter.post("/users", upload.single("picture"), userC.createData);
 userRouter.get("/users", userC.getData);

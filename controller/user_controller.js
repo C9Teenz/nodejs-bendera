@@ -25,14 +25,12 @@ const createData = async (req, res) => {
   const { name } = req.body;
   let data;
   if (req.file) {
-    data = `${req.protocol}://${req.get("host")}/uploads/${
-      req.file.filename
-    }`.toString();
+    data = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
     patnerEthosBucket
       .file(req.file.filename)
       .createWriteStream({ resumable: false, gzip: true });
   } else {
-    data = " ";
+    return res.status(400).json({ message: "no image found" });
   }
 
   const sql = `INSERT INTO users (name,picture) VALUES('${name}','${data.toString()}')`;
@@ -47,14 +45,11 @@ const createData = async (req, res) => {
 const updateData = async (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
-
   let data;
   if (req.file) {
-    data = `${req.protocol}://${req.get("host")}/uploads/${
-      req.file.filename
-    }`.toString();
+    data = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
   } else {
-    data = "";
+    return res.status(400).json({ message: "no image found" });
   }
   const sql = `UPDATE users SET name='${name}',picture='${data.toString()}' WHERE id=${id}`;
   await pool.query(sql, (error, result) => {
